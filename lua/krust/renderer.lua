@@ -12,6 +12,15 @@ local function close_float()
 end
 
 function M.render()
+  -- If floating window is already open, focus it on second press
+  if float_winnr and vim.api.nvim_win_is_valid(float_winnr) then
+    local current_win = vim.api.nvim_get_current_win()
+    if current_win ~= float_winnr then
+      vim.api.nvim_set_current_win(float_winnr)
+      return
+    end
+  end
+
   local cursor = vim.api.nvim_win_get_cursor(0)
   local diagnostics = vim.diagnostic.get(0, { lnum = cursor[1] - 1 })
 

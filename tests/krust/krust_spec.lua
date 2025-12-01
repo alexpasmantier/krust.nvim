@@ -1,12 +1,7 @@
-local plugin = require("krust")
+local krust = require("krust")
 
-describe("setup", function()
-  it("works with default", function()
-    assert(plugin.hello() == "Hello!", "my first function with param = Hello!")
-  end)
-
-  it("works with custom var", function()
-    plugin.setup({ opt = "custom" })
-    assert(plugin.hello() == "custom", "my first function with param = custom")
+describe("krust", function()
+  it("exposes render function", function()
+    assert.is_function(krust.render)
   end)
 end)

@@ -1,27 +1,62 @@
--- main module file
-local module = require("krust.module")
+local renderer = require("krust.renderer")
 
----@class Config
----@field opt string Your config option
-local config = {
-  opt = "Hello!",
-}
-
----@class MyModule
 local M = {}
 
----@type Config
-M.config = config
+local setup_done = false
 
----@param args Config?
--- you can define your setup function here. Usually configurations can be merged, accepting outside params and
--- you can also put some validation here for those.
-M.setup = function(args)
-  M.config = vim.tbl_deep_extend("force", M.config, args or {})
+---@class KrustConfig
+---@field keymap string|false Default keymap for Rust buffers (false to disable)
+
+local config = {
+  keymap = "<leader>k",
+}
+
+---@param opts? KrustConfig
+M.setup = function(opts)
+  if setup_done then
+    return
+  end
+  setup_done = true
+
+  config = vim.tbl_deep_extend("force", config, opts or {})
+
+  -- Wrap vim.lsp.start to automatically add colored diagnostics to rust_analyzer
+  local original_start = vim.lsp.start
+  vim.lsp.start = function(config, opts)
+    if config.name == "rust_analyzer" or (config.cmd and config.cmd[1] and config.cmd[1]:match("rust[-_]analyzer")) then
+      config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+      config.capabilities.experimental = config.capabilities.experimental or {}
+      if not config.capabilities.experimental.colorDiagnosticOutput then
+        config.capabilities.experimental.colorDiagnosticOutput = true
+      end
+    end
+    return original_start(config, opts)
+  end
+
+  -- Also wrap lspconfig if it's loaded
+  local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
+  if lspconfig_ok and lspconfig.rust_analyzer then
+    local original_setup = lspconfig.rust_analyzer.setup
+    lspconfig.rust_analyzer.setup = function(config)
+      config = config or {}
+      config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+      config.capabilities.experimental = config.capabilities.experimental or {}
+      if not config.capabilities.experimental.colorDiagnosticOutput then
+        config.capabilities.experimental.colorDiagnosticOutput = true
+      end
+      return original_setup(config)
+    end
+  end
 end
 
-M.hello = function()
-  return module.my_first_function(M.config.opt)
+--- Render diagnostic on current line in a floating window
+M.render = function()
+  renderer.render()
+end
+
+--- Get current config
+M.get_config = function()
+  return config
 end
 
 return M

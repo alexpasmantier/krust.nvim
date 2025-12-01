@@ -20,7 +20,6 @@ M.setup = function(opts)
 
   config = vim.tbl_deep_extend("force", config, opts or {})
 
-  -- Wrap vim.lsp.start to automatically add colored diagnostics to rust_analyzer
   local original_start = vim.lsp.start
   vim.lsp.start = function(config, opts)
     if config.name == "rust_analyzer" or (config.cmd and config.cmd[1] and config.cmd[1]:match("rust[-_]analyzer")) then
@@ -33,7 +32,6 @@ M.setup = function(opts)
     return original_start(config, opts)
   end
 
-  -- Also wrap lspconfig if it's loaded
   local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
   if lspconfig_ok and lspconfig.rust_analyzer then
     local original_setup = lspconfig.rust_analyzer.setup
@@ -49,12 +47,10 @@ M.setup = function(opts)
   end
 end
 
---- Render diagnostic on current line in a floating window
 M.render = function()
   renderer.render()
 end
 
---- Get current config
 M.get_config = function()
   return config
 end

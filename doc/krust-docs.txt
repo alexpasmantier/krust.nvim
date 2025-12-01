@@ -1,70 +1,104 @@
-*my-template-docs.txt*     For Neovim >= 0.8.0    Last change: 2025 October 08
+*krust-docs.txt*       For Neovim >= 0.8.0       Last change: 2025 December 01
 
 ==============================================================================
-Table of Contents                         *my-template-docs-table-of-contents*
+Table of Contents                               *krust-docs-table-of-contents*
 
-1. A Neovim Plugin Template        |my-template-docs-a-neovim-plugin-template|
-  - Using it              |my-template-docs-a-neovim-plugin-template-using-it|
-  - Features and structure|my-template-docs-a-neovim-plugin-template-features-and-structure|
-2. Links                                              |my-template-docs-links|
+1. krust.nvim                                          |krust-docs-krust.nvim|
+  - Installation                          |krust-docs-krust.nvim-installation|
+  - Configuration                        |krust-docs-krust.nvim-configuration|
+  - Usage                                        |krust-docs-krust.nvim-usage|
+  - Why use this?                        |krust-docs-krust.nvim-why-use-this?|
+  - Credits                                    |krust-docs-krust.nvim-credits|
+2. Links                                                    |krust-docs-links|
 
 ==============================================================================
-1. A Neovim Plugin Template        *my-template-docs-a-neovim-plugin-template*
+1. krust.nvim                                          *krust-docs-krust.nvim*
+
+Improved Rust diagnostics rendering for Neovim’s rust-analyzer LSP client.
 
 
+INSTALLATION                              *krust-docs-krust.nvim-installation*
 
-A template repository for Neovim plugins.
 
+LAZY.NVIM ~
 
-USING IT                  *my-template-docs-a-neovim-plugin-template-using-it*
-
-Via `gh`:
-
->
-    $ gh repo create my-plugin -p ellisonleao/nvim-plugin-template
+>lua
+    {
+      "alexpasmantier/krust.nvim",
+      ft = "rust",
+    }
 <
 
-Via github web page:
 
-Click on `Use this template`
+PACKER.NVIM ~
 
-
-
-
-FEATURES AND STRUCTURE*my-template-docs-a-neovim-plugin-template-features-and-structure*
-
-- 100% Lua
-- Github actions for:
-    - running tests using plenary.nvim <https://github.com/nvim-lua/plenary.nvim> and busted <https://olivinelabs.com/busted/>
-    - check for formatting errors (Stylua)
-    - vimdocs autogeneration from README.md file
-    - luarocks release (LUAROCKS_API_KEY secret configuration required)
-
-
-PLUGIN STRUCTURE ~
-
->
-    .
-    ├── lua
-    │   ├── plugin_name
-    │   │   └── module.lua
-    │   └── plugin_name.lua
-    ├── Makefile
-    ├── plugin
-    │   └── plugin_name.lua
-    ├── README.md
-    ├── tests
-    │   ├── minimal_init.lua
-    │   └── plugin_name
-    │       └── plugin_name_spec.lua
+>lua
+    use {
+      "alexpasmantier/krust.nvim",
+      ft = "rust",
+    }
 <
 
-==============================================================================
-2. Links                                              *my-template-docs-links*
 
-1. *GitHub Workflow Status*: https://img.shields.io/github/actions/workflow/status/ellisonleao/nvim-plugin-template/lint-test.yml?branch=main&style=for-the-badge
-2. *Lua*: https://img.shields.io/badge/Made%20with%20Lua-blueviolet.svg?style=for-the-badge&logo=lua
-3. **: https://docs.github.com/assets/cb-36544/images/help/repository/use-this-template-button.png
+CONFIGURATION                            *krust-docs-krust.nvim-configuration*
+
+The plugin **automatically configures** rust-analyzer to send colored
+diagnostics and sets up `<leader>k` as the default keybinding in Rust buffers.
+
+If this conflicts with your setup, you can customize or disable the keybinding:
+
+>lua
+    -- With lazy.nvim
+    {
+      "alexpasmantier/krust.nvim",
+      ft = "rust",
+      opts = {
+        keymap = "<leader>d",  -- Change the keymap
+        -- keymap = false,     -- Disable default keymap
+      },
+    }
+<
+
+**Note:** If rust-analyzer starts before krust.nvim loads, you may need
+`:LspRestart` for colors to appear. To avoid this, load krust.nvim before your
+LSP config.
+
+
+USAGE                                            *krust-docs-krust.nvim-usage*
+
+**Default keybinding:** `<leader>k` in Rust buffers
+
+Or use the command:
+
+>vim
+    :Krust
+<
+
+Or call from Lua:
+
+>lua
+    require('krust').render()
+<
+
+A floating window will appear showing the full formatted diagnostic. Press `q`
+or `<Esc>` to close it.
+
+
+WHY USE THIS?                            *krust-docs-krust.nvim-why-use-this?*
+
+- **Minimal** - if all you care about is having nicely formatted Rust diagnostics
+- **Zero configuration** - works out of the box with rust-analyzer
+
+
+CREDITS                                        *krust-docs-krust.nvim-credits*
+
+Inspired by rustaceanvim <https://github.com/mrcjkb/rustaceanvim>’s
+diagnostic rendering, but simplified and standalone.
+
+==============================================================================
+2. Links                                                    *krust-docs-links*
+
+1. *Lua*: https://img.shields.io/badge/Made%20with%20Lua-blueviolet.svg?style=for-the-badge&logo=lua
 
 Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
 

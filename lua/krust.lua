@@ -22,10 +22,8 @@ local config = {
 
 ---@param opts? KrustConfig
 M.setup = function(opts)
-  -- Merge user config with defaults
   config = vim.tbl_deep_extend("force", config, opts or {})
 
-  -- Only patch LSP once
   if lsp_patched then
     return
   end
@@ -41,20 +39,6 @@ M.setup = function(opts)
       end
     end
     return original_start(config, opts)
-  end
-
-  local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
-  if lspconfig_ok and lspconfig.rust_analyzer then
-    local original_setup = lspconfig.rust_analyzer.setup
-    lspconfig.rust_analyzer.setup = function(config)
-      config = config or {}
-      config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
-      config.capabilities.experimental = config.capabilities.experimental or {}
-      if not config.capabilities.experimental.colorDiagnosticOutput then
-        config.capabilities.experimental.colorDiagnosticOutput = true
-      end
-      return original_setup(config)
-    end
   end
 end
 

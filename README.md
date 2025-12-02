@@ -1,12 +1,24 @@
+<div align="center" style="color: #abb2bf;font-family: 'Fira Code', monospace;">
+
 # krust.nvim
 
-![Lua](https://img.shields.io/badge/Made%20with%20Lua-blueviolet.svg?style=for-the-badge&logo=lua)
+[![Neovim](https://img.shields.io/badge/Neovim-0.9%2B-7e98e8.svg?style=for-the-badge&logo=neovim)](https://neovim.io/)
+![Lua](https://img.shields.io/badge/Made%20with%20Lua-8faf77.svg?style=for-the-badge&logo=lua)
 
-Improved Rust diagnostics rendering for Neovim's rust-analyzer LSP client.
+**🦀 Nicer Rust diagnostics for Neovim.**
+
+<img title="krust.nvim" src="assets/krust.png" alt="krust.nvim screenshot"/>
+  <kbd>&lt;leader&gt;k</kbd>
+
+</div>
+
+## Why?
+
+To be able to read complete Rust compiler diagnostics in Neovim with proper colors and formatting, similar to how they appear when running cargo in the terminal.
 
 ## Installation
 
-### [lazy.nvim](https://github.com/folke/lazy.nvim)
+### [`lazy.nvim`](https://github.com/folke/lazy.nvim)
 
 ```lua
 {
@@ -15,7 +27,7 @@ Improved Rust diagnostics rendering for Neovim's rust-analyzer LSP client.
 }
 ```
 
-### [packer.nvim](https://github.com/wbthomason/packer.nvim)
+### [`packer.nvim`](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use {
@@ -67,18 +79,9 @@ require('krust').render()
 **Krust** tries to behave like LSP hover documentation windows:
 
 - **First press** of `<leader>k`: Opens the floating window (not focused)
-- **Second press** of `<leader>k`: Enters the floating window so you can scroll
+- **Second press** of `<leader>k`: Enters the floating window so you may scroll
 - **`q` or `<Esc>`**: Closes the window
-
-With `auto_focus = true`, the window opens focused immediately, so you can scroll right away.
-
-The window automatically closes when you move the cursor in the original buffer.
-
-## Why use this?
-
-- **Minimal** - if all you care about is having nicely formatted Rust diagnostics
-- **Zero configuration** - works out of the box
 
 ## Credits
 
-This was greatly inspired by [rustaceanvim](https://github.com/mrcjkb/rustaceanvim)'s diagnostic rendering.
+This was inspired by [rustaceanvim](https://github.com/mrcjkb/rustaceanvim)'s diagnostic rendering.

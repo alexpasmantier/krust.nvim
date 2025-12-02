@@ -1,7 +1,7 @@
 local krust = require("krust")
 
--- Call setup with defaults to ensure LSP patching happens
--- Users can call setup() again with their config (via lazy.nvim opts or manually)
+-- call setup with defaults to ensure LSP patching happens
+-- users can call setup() again with their config (via lazy.nvim opts or manually)
 krust.setup()
 
 vim.api.nvim_create_autocmd("FileType", {

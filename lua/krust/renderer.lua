@@ -11,7 +11,10 @@ local function close_float()
   end
 end
 
-function M.render()
+---@param float_config? table Floating window configuration
+function M.render(float_config)
+  float_config = float_config or {}
+
   -- If floating window is already open, focus it on second press
   if float_winnr and vim.api.nvim_win_is_valid(float_winnr) then
     local current_win = vim.api.nvim_get_current_win()
@@ -43,31 +46,30 @@ function M.render()
   local content_width = utils.get_max_line_width(stripped)
 
   vim.schedule(function()
-    local win_width = math.min(content_width + 4, math.floor(vim.o.columns * 0.9))
-    local win_height = math.min(#lines, math.floor(vim.o.lines * 0.8))
-
     local bufnr = vim.api.nvim_create_buf(false, true)
     vim.bo[bufnr].bufhidden = "wipe"
 
-    local winnr = vim.api.nvim_open_win(bufnr, false, {
+    local auto_focus = float_config.auto_focus or false
+    local winnr = vim.api.nvim_open_win(bufnr, auto_focus, {
       relative = "cursor",
-      width = win_width,
-      height = win_height,
+      width = content_width + 2,
+      height = #lines,
       row = 1,
       col = 0,
       style = "minimal",
-      border = "rounded",
+      border = float_config.border or "rounded",
       zindex = 50,
     })
 
     local chanid = vim.api.nvim_open_term(bufnr, { force_crlf = true })
     vim.api.nvim_chan_send(chanid, rendered)
+    vim.bo[bufnr].modifiable = false
 
     float_winnr = winnr
 
     -- Auto-close on cursor movement or mode changes in the original buffer
     local close_events = vim.api.nvim_create_augroup("KrustFloatClose", { clear = true })
-    vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "InsertEnter" }, {
+    vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
       group = close_events,
       buffer = 0,
       callback = close_float,

@@ -26,9 +26,7 @@ use {
 
 ## Configuration
 
-The plugin **automatically configures** rust-analyzer to send colored diagnostics and sets up `<leader>k` as the default keybinding in Rust buffers.
-
-If this conflicts with your setup, you can customize or disable the keybinding:
+**Krust** automatically configures rust-analyzer to send colored diagnostics and sets up <kbd>\<leader\>k</kbd> as the default keybinding in Rust buffers.
 
 ```lua
 -- With lazy.nvim
@@ -36,13 +34,17 @@ If this conflicts with your setup, you can customize or disable the keybinding:
   "alexpasmantier/krust.nvim",
   ft = "rust",
   opts = {
-    keymap = "<leader>d",  -- Change the keymap
+    keymap = "<leader>d",  -- Change the keymap (default: "<leader>k")
     -- keymap = false,     -- Disable default keymap
+    float_win = {
+      border = "rounded",    -- Border style: "none", "single", "double", "rounded", "solid", "shadow"
+      auto_focus = false,    -- Auto-focus float (default: false)
+    },
   },
 }
 ```
 
-**Note:** If rust-analyzer starts before krust.nvim loads, you may need `:LspRestart` for colors to appear. To avoid this, load krust.nvim before your LSP config.
+**Note:** If rust-analyzer starts before krust.nvim loads, you may need `:LspRestart` for colors to appear. To avoid this, load `krust.nvim` before your LSP config.
 
 ## Usage
 
@@ -60,14 +62,23 @@ Or call from Lua:
 require('krust').render()
 ```
 
-A floating window will appear showing the full formatted diagnostic. Press `q` or `<Esc>` to close it.
+### Behavior
+
+**Krust** tries to behave like LSP hover documentation windows:
+
+- **First press** of `<leader>k`: Opens the floating window (not focused)
+- **Second press** of `<leader>k`: Enters the floating window so you can scroll
+- **`q` or `<Esc>`**: Closes the window
+
+With `auto_focus = true`, the window opens focused immediately, so you can scroll right away.
+
+The window automatically closes when you move the cursor in the original buffer.
 
 ## Why use this?
 
 - **Minimal** - if all you care about is having nicely formatted Rust diagnostics
-- **Zero configuration** - works out of the box with rust-analyzer
+- **Zero configuration** - works out of the box
 
 ## Credits
 
-Inspired by [rustaceanvim](https://github.com/mrcjkb/rustaceanvim)'s diagnostic rendering, but simplified and
-standalone.
+This was greatly inspired by [rustaceanvim](https://github.com/mrcjkb/rustaceanvim)'s diagnostic rendering.

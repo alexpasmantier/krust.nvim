@@ -2,23 +2,34 @@ local renderer = require("krust.renderer")
 
 local M = {}
 
-local setup_done = false
+local lsp_patched = false
+
+---@class KrustFloatConfig
+---@field border? string Border style: "none", "single", "double", "rounded", "solid", "shadow"
+---@field auto_focus? boolean Automatically focus the floating window on open (default: false)
 
 ---@class KrustConfig
 ---@field keymap string|false Default keymap for Rust buffers (false to disable)
+---@field float_win? KrustFloatConfig Floating window configuration
 
 local config = {
   keymap = "<leader>k",
+  float_win = {
+    border = "rounded",
+    auto_focus = false,
+  },
 }
 
 ---@param opts? KrustConfig
 M.setup = function(opts)
-  if setup_done then
+  -- Merge user config with defaults
+  config = vim.tbl_deep_extend("force", config, opts or {})
+
+  -- Only patch LSP once
+  if lsp_patched then
     return
   end
-  setup_done = true
-
-  config = vim.tbl_deep_extend("force", config, opts or {})
+  lsp_patched = true
 
   local original_start = vim.lsp.start
   vim.lsp.start = function(config, opts)
@@ -48,7 +59,7 @@ M.setup = function(opts)
 end
 
 M.render = function()
-  renderer.render()
+  renderer.render(config.float_win)
 end
 
 M.get_config = function()

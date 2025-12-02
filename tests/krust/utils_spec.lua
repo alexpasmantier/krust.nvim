@@ -44,6 +44,162 @@ describe("krust.utils", function()
     end)
   end)
 
+  describe("parse_ansi_codes", function()
+    it("handles text without ANSI codes", function()
+      local text = "plain text"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("plain text", segments[1].text)
+      assert.is_nil(segments[1].hl_group)
+    end)
+
+    it("parses basic foreground color (red)", function()
+      local text = "\27[31mred text\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("red text", segments[1].text)
+      assert.equals("KrustAnsiFg31", segments[1].hl_group)
+    end)
+
+    it("parses bold text", function()
+      local text = "\27[1mbold text\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("bold text", segments[1].text)
+      assert.equals("KrustAnsiBold", segments[1].hl_group)
+    end)
+
+    it("parses bold + color combined", function()
+      local text = "\27[1;31mbold red\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("bold red", segments[1].text)
+      assert.equals("KrustAnsiFg31Bold", segments[1].hl_group)
+    end)
+
+    it("parses 256-color format (bright red)", function()
+      local text = "\27[38;5;9mred text\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("red text", segments[1].text)
+      assert.equals("KrustAnsiFg91", segments[1].hl_group) -- Color 9 maps to ANSI 91
+    end)
+
+    it("parses 256-color format (bright blue)", function()
+      local text = "\27[38;5;12mblue text\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("blue text", segments[1].text)
+      assert.equals("KrustAnsiFg94", segments[1].hl_group) -- Color 12 maps to ANSI 94
+    end)
+
+    it("parses bold + 256-color format", function()
+      local text = "\27[1m\27[38;5;9merror\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("error", segments[1].text)
+      assert.equals("KrustAnsiFg91Bold", segments[1].hl_group)
+    end)
+
+    it("handles reset codes", function()
+      local text = "\27[31mred\27[0mnormal\27[32mgreen\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(3, #segments)
+      assert.equals("red", segments[1].text)
+      assert.equals("KrustAnsiFg31", segments[1].hl_group)
+      assert.equals("normal", segments[2].text)
+      assert.is_nil(segments[2].hl_group)
+      assert.equals("green", segments[3].text)
+      assert.equals("KrustAnsiFg32", segments[3].hl_group)
+    end)
+
+    it("parses rust-analyzer style diagnostic", function()
+      local text = "\27[0m\27[1m\27[38;5;9merror[E0004]\27[0m\27[0m\27[1m: non-exhaustive patterns\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+
+      -- Should have segments for "error[E0004]" (bold red) and ": non-exhaustive patterns" (bold)
+      local found_error = false
+      local found_message = false
+
+      for _, seg in ipairs(segments) do
+        if seg.text:match("error%[E0004%]") then
+          assert.equals("KrustAnsiFg91Bold", seg.hl_group)
+          found_error = true
+        elseif seg.text:match(": non%-exhaustive patterns") then
+          assert.equals("KrustAnsiBold", seg.hl_group)
+          found_message = true
+        end
+      end
+
+      assert.is_true(found_error)
+      assert.is_true(found_message)
+    end)
+
+    it("handles text with newlines", function()
+      local text = "\27[31mline1\nline2\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("line1\nline2", segments[1].text)
+      assert.equals("KrustAnsiFg31", segments[1].hl_group)
+    end)
+
+    it("handles multiple colors on same line", function()
+      local text = "\27[31mred\27[0m \27[32mgreen\27[0m \27[34mblue\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(5, #segments)
+      assert.equals("red", segments[1].text)
+      assert.equals("KrustAnsiFg31", segments[1].hl_group)
+      assert.equals(" ", segments[2].text)
+      assert.is_nil(segments[2].hl_group)
+      assert.equals("green", segments[3].text)
+      assert.equals("KrustAnsiFg32", segments[3].hl_group)
+      assert.equals(" ", segments[4].text)
+      assert.is_nil(segments[4].hl_group)
+      assert.equals("blue", segments[5].text)
+      assert.equals("KrustAnsiFg34", segments[5].hl_group)
+    end)
+
+    it("handles bold disable (code 22)", function()
+      local text = "\27[1mbold\27[22mnormal\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(2, #segments)
+      assert.equals("bold", segments[1].text)
+      assert.equals("KrustAnsiBold", segments[1].hl_group)
+      assert.equals("normal", segments[2].text)
+      assert.is_nil(segments[2].hl_group)
+    end)
+
+    it("handles empty string", function()
+      local segments = utils.parse_ansi_codes("")
+      assert.equals(0, #segments)
+    end)
+
+    it("handles empty ANSI sequence", function()
+      local text = "\27[mtext\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      assert.equals(1, #segments)
+      assert.equals("text", segments[1].text)
+      assert.is_nil(segments[1].hl_group)
+    end)
+
+    it("ignores 256-color indices outside 0-15 range", function()
+      local text = "\27[38;5;200mhigh color\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      -- Color 200 is outside our supported range, should be ignored
+      assert.equals(1, #segments)
+      assert.equals("high color", segments[1].text)
+      assert.is_nil(segments[1].hl_group) -- No color should be applied
+    end)
+
+    it("handles background colors (code 48) gracefully", function()
+      local text = "\27[48;5;1mbg color\27[0m"
+      local segments = utils.parse_ansi_codes(text)
+      -- We don't support background colors, but shouldn't crash
+      assert.equals(1, #segments)
+      assert.equals("bg color", segments[1].text)
+    end)
+  end)
+
   describe("get_max_line_width", function()
     it("returns width for single line", function()
       local text = "hello world"

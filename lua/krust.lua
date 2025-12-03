@@ -13,7 +13,7 @@ local lsp_patched = false
 ---@field float_win? KrustFloatConfig Floating window configuration
 
 local config = {
-  keymap = "<leader>k",
+  keymap = false,
   float_win = {
     border = "rounded",
     auto_focus = false,

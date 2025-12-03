@@ -8,7 +8,6 @@
 **🦀 Nicer Rust diagnostics for Neovim.**
 
 <img title="krust.nvim" src="assets/krust.png" alt="krust.nvim screenshot"/>
-  <kbd>&lt;leader&gt;k</kbd>
 
 </div>
 
@@ -38,7 +37,7 @@ use {
 
 ## Configuration
 
-**Krust** automatically configures rust-analyzer to send colored diagnostics and sets up <kbd>\<leader\>k</kbd> as the default keybinding in Rust buffers.
+**Krust** automatically configures rust-analyzer to send colored diagnostics. No keybindings are set by default to avoid conflicts.
 
 ```lua
 -- With lazy.nvim
@@ -46,8 +45,7 @@ use {
   "alexpasmantier/krust.nvim",
   ft = "rust",
   opts = {
-    keymap = "<leader>d",  -- Change the keymap (default: "<leader>k")
-    -- keymap = false,     -- Disable default keymap
+    keymap = "<leader>k",  -- Set a keymap for Rust buffers (default: false)
     float_win = {
       border = "rounded",    -- Border style: "none", "single", "double", "rounded", "solid", "shadow"
       auto_focus = false,    -- Auto-focus float (default: false)
@@ -60,9 +58,7 @@ use {
 
 ## Usage
 
-**Default keybinding:** `<leader>k` in Rust buffers
-
-Or use the command:
+Use the command:
 
 ```vim
 :Krust
@@ -78,8 +74,8 @@ require('krust').render()
 
 **Krust** tries to behave like LSP hover documentation windows:
 
-- **First press** of `<leader>k`: Opens the floating window (not focused)
-- **Second press** of `<leader>k`: Enters the floating window so you may scroll
+- **First invocation**: Opens the floating window (not focused)
+- **Second invocation**: Enters the floating window so you may scroll
 - **`q` or `<Esc>`**: Closes the window
 
 ## Credits

@@ -31,7 +31,13 @@ M.setup = function(opts)
 
   local original_start = vim.lsp.start
   vim.lsp.start = function(config, opts)
-    if config.name == "rust_analyzer" or (config.cmd and config.cmd[1] and config.cmd[1]:match("rust[-_]analyzer")) then
+    local is_rust_analyzer = config.name == "rust_analyzer"
+    -- Check if cmd is a table (array) before trying to index it
+    if not is_rust_analyzer and type(config.cmd) == "table" and config.cmd[1] then
+      is_rust_analyzer = config.cmd[1]:match("rust[-_]analyzer") ~= nil
+    end
+
+    if is_rust_analyzer then
       config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
       config.capabilities.experimental = config.capabilities.experimental or {}
       if not config.capabilities.experimental.colorDiagnosticOutput then

@@ -109,6 +109,10 @@ function M.render(float_config)
   local window_height = math.min(estimated_height, max_height)
 
   vim.schedule(function()
+    -- Capture the original buffer number before creating the float window
+    -- This is needed for autocmds to work correctly when auto_focus = true
+    local orig_bufnr = vim.api.nvim_get_current_buf()
+
     local bufnr = vim.api.nvim_create_buf(false, true)
     vim.bo[bufnr].bufhidden = "wipe"
 
@@ -159,7 +163,7 @@ function M.render(float_config)
     local close_events = vim.api.nvim_create_augroup("KrustFloatClose", { clear = true })
     vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
       group = close_events,
-      buffer = 0,
+      buffer = orig_bufnr,
       callback = close_float,
       once = false,
     })

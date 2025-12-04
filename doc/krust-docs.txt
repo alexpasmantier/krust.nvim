@@ -1,4 +1,4 @@
-*krust-docs.txt*       For Neovim >= 0.8.0       Last change: 2025 December 03
+*krust-docs.txt*       For Neovim >= 0.8.0       Last change: 2025 December 04
 
 ==============================================================================
 Table of Contents                               *krust-docs-table-of-contents*
